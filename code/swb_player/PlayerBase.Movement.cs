@@ -86,7 +86,7 @@ public partial class PlayerBase
 		if ( !WishVelocity.IsNearZeroLength ) WishVelocity = WishVelocity.Normal;
 
 		if ( IsCrouching ) WishVelocity *= CrouchSpeed;
-		else if ( IsRunning ) WishVelocity *= RunSpeed;
+		else if ( IsRunning && IsOnGround ) WishVelocity *= RunSpeed;
 		else WishVelocity *= WalkSpeed;
 	}
 
@@ -136,7 +136,13 @@ public partial class PlayerBase
 
 	void Jump()
 	{
-		if ( !IsOnGround ) return;
+		if ( !IsOnGround && !IsCrouching ) return;
+
+		if ( IsCrouching )
+		{
+			MaintainCrouch = false;
+			return;
+		}
 
 		CharacterController.Punch( Vector3.Up * JumpForce );
 		AnimationHelper?.TriggerJump();

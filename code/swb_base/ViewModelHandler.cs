@@ -47,6 +47,8 @@ public class ViewModelHandler : Component
 	Vector3 localVel;
 	bool isAiming;
 
+	bool ToggleCrouch = false;
+
 	protected override void OnDestroy()
 	{
 		player.Camera.FieldOfView = Screen.CreateVerticalFieldOfView( Preferences.FieldOfView );
@@ -155,10 +157,19 @@ public class ViewModelHandler : Component
 		targetVectorRot -= new Vector3( MathF.Cos( breatheTime / 5.0f ), MathF.Cos( breatheTime / 4.0f ), MathF.Cos( breatheTime / 7.0f ) );
 
 		// Crouching animation
-		if ( Input.Down( InputButtonHelper.Duck ) && player.IsOnGround )
-			targetVectorPos += new Vector3( -1.0f, -1.0f, 0.5f );
+		if ( Input.Down( InputButtonHelper.Duck ) || ToggleCrouch )
+			ApplyCrouchAnimation();
+
+		if (Input.Pressed(InputButtonHelper.ToggleDuck))
+		{
+			ToggleCrouch = !ToggleCrouch;
+		}
 	}
 
+	void ApplyCrouchAnimation()
+	{
+		targetVectorPos += new Vector3( -1.0f, -1.0f, 0.5f );
+	}
 
 	void HandleWalkAnimation()
 	{
