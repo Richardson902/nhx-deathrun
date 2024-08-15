@@ -10,6 +10,8 @@ public partial class InputButtonHelper
 	public static string Run => "Run";
 	public static string Walk => "Walk";
 	public static string Duck => "Duck";
+	public static string ToggleDuck => "Toggle Duck";
+	public static string ToggleCamera => "Toggle Camera";
 	public static string PrimaryAttack => "attack1";
 	public static string SecondaryAttack => "attack2";
 	public static string Reload => "reload";

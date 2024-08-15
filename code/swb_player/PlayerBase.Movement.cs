@@ -29,6 +29,9 @@ public partial class PlayerBase
 
 	TimeSince timeSinceLastFootstep = 0;
 
+	private bool MaintainCrouch = false;
+	private bool WasRunning = false;
+
 	void OnMovementAwake()
 	{
 		CharacterController = Components.Get<CharacterController>();
@@ -44,6 +47,13 @@ public partial class PlayerBase
 		if ( !IsProxy )
 		{
 			IsRunning = Input.Down( InputButtonHelper.Run );
+
+			if ( IsRunning && !WasRunning )
+			{
+				MaintainCrouch = false;
+			}
+
+			WasRunning = IsRunning;
 
 			if ( Input.Pressed( InputButtonHelper.Jump ) )
 				Jump();
@@ -147,19 +157,27 @@ public partial class PlayerBase
 
 	void UpdateCrouch()
 	{
-		if ( Input.Down( InputButtonHelper.Duck ) && !IsCrouching && IsOnGround )
+		// if button down & not crouching & on grounf
+		if ( Input.Down( InputButtonHelper.Duck ) && !IsCrouching )
 		{
+			// crouching is true
 			IsCrouching = true;
+
+			// crouch
 			CharacterController.Height /= 2f;
+
+			// adjust collision
 			BodyCollider.End = BodyCollider.End.WithZ( BodyCollider.End.z / 2f );
 		}
 
-		if ( IsCrouching && (!Input.Down( InputButtonHelper.Duck ) || !IsOnGround) )
+		// if button up & crouching or not on ground
+		if ( IsCrouching && (!Input.Down( InputButtonHelper.Duck )) && !MaintainCrouch )
 		{
 			// Check we have space to uncrouch
 			var targetHeight = CharacterController.Height * 2f;
-			var upTrace = CharacterController.TraceDirection( Vector3.Up * targetHeight );
+			var upTrace = CharacterController.TraceDirection( Vector3.Up * ( targetHeight - CharacterController.Height ) );
 
+			// If we have space, uncrouch
 			if ( !upTrace.Hit )
 			{
 				IsCrouching = false;
@@ -167,6 +185,25 @@ public partial class PlayerBase
 				BodyCollider.End = BodyCollider.End.WithZ( BodyCollider.End.z * 2f );
 			}
 		}
+
+		// Toggle crouch
+		if( Input.Pressed( InputButtonHelper.ToggleDuck ))
+		{
+			Log.Info("Toggle duck");
+			if(!IsCrouching)
+			{
+				MaintainCrouch = true;
+				IsCrouching = true;
+				CharacterController.Height /= 2f;
+				BodyCollider.End = BodyCollider.End.WithZ( BodyCollider.End.z / 2f );
+			}
+			else if(IsCrouching)
+			{
+				MaintainCrouch = false;
+			}
+		}
+
+
 	}
 
 	void OnAnimEventFootstep( SceneModel.FootstepEvent footstepEvent )

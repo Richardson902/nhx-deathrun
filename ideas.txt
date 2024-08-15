@@ -1,0 +1,3 @@
+add a check when jumping, if the player height is halfed, make the jump button increase the player height back up
+add ability to uncrouch in the air when jumping if crouched
+add running animation in the air
