@@ -46,7 +46,17 @@ public partial class PlayerBase
 	{
 		if ( !IsProxy )
 		{
+			
 			IsRunning = Input.Down( InputButtonHelper.Run );
+
+
+			// Stop sprinting if aiming pressed while sprinting
+			if ( Input.Down( InputButtonHelper.SecondaryAttack ) && IsRunning )
+			{
+				IsRunning = false;
+				// IsAiming = true;
+			}
+
 
 			if ( IsRunning && !WasRunning )
 			{
@@ -207,6 +217,12 @@ public partial class PlayerBase
 			{
 				MaintainCrouch = false;
 			}
+		}
+
+		// Reset ToggleCrouch if player is not crouching
+		if(!IsCrouching)
+		{
+			MaintainCrouch = false;
 		}
 
 

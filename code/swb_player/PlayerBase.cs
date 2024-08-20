@@ -44,7 +44,7 @@ public partial class PlayerBase : Component, Component.INetworkSpawn, IPlayerBas
 
 	public void OnNetworkSpawn( Connection connection )
 	{
-		ApplyClothes( connection );
+		ApplyClothes( connection ); //Maybe remove to stop applying hair and clothes to bots
 	}
 
 	protected override void OnStart()

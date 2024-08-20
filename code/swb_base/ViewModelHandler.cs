@@ -164,6 +164,12 @@ public class ViewModelHandler : Component
 		{
 			ToggleCrouch = !ToggleCrouch;
 		}
+
+		// Reset ToggleCrouch if player is not crouching
+		if (!player.IsCrouching)
+		{
+			ToggleCrouch = false;
+		}
 	}
 
 	void ApplyCrouchAnimation()
@@ -180,7 +186,7 @@ public class ViewModelHandler : Component
 		var yaw = 0.0f;
 
 		// Check if on the ground
-		if ( !player.IsOnGround )
+		if ( !player.IsOnGround && !player.IsRunning)
 			return;
 
 		// Check if sprinting
@@ -192,9 +198,9 @@ public class ViewModelHandler : Component
 
 		// Check for sideways velocity to sway the gun slightly
 		if ( isAiming || localVel.x > 0.0f )
-			roll = -7.0f * (localVel.x / maxWalkSpeed);
+			roll = -3.5f * (localVel.x / maxWalkSpeed); // original value was -7.0f
 		else if ( localVel.x < 0.0f )
-			yaw = 3.0f * (localVel.x / maxWalkSpeed);
+			yaw = 1.5f * (localVel.x / maxWalkSpeed); // original value was 3.0f
 
 		// Check if ADS & firing
 		if ( isAiming && Weapon.TimeSincePrimaryShoot < 0.1f )
@@ -203,19 +209,29 @@ public class ViewModelHandler : Component
 			return;
 		}
 
-		// Perform walk cycle
-		targetVectorPos -= new Vector3( (-MathF.Cos( breatheTime / 2.0f ) / 5.0f) * walkSpeed / maxWalkSpeed - yaw / 4.0f, 0.0f, 0.0f );
-		targetVectorRot -= new Vector3( (Math.Clamp( MathF.Cos( breatheTime ), -0.3f, 0.3f ) * 2.0f) * walkSpeed / maxWalkSpeed, (-MathF.Cos( breatheTime / 2.0f ) * 1.2f) * walkSpeed / maxWalkSpeed - yaw * 1.5f, roll );
+		
+		if( isAiming )
+		{
+			// Reduced sway values when aiming
+    		targetVectorPos -= new Vector3((-MathF.Cos(breatheTime / 2.0f) / 10.0f) * walkSpeed / maxWalkSpeed - yaw / 8.0f, 0.0f, 0.0f);
+    		targetVectorRot -= new Vector3((Math.Clamp(MathF.Cos(breatheTime), -0.15f, 0.15f) * 1.0f) * walkSpeed / maxWalkSpeed, (-MathF.Cos(breatheTime / 2.0f) * 0.6f) * walkSpeed / maxWalkSpeed - yaw * 0.75f, roll);
+		}
+		else
+		{
+			// Original sway values when not aiming
+    		targetVectorPos -= new Vector3((-MathF.Cos(breatheTime / 2.0f) / 5.0f) * walkSpeed / maxWalkSpeed - yaw / 4.0f, 0.0f, 0.0f);
+    		targetVectorRot -= new Vector3((Math.Clamp(MathF.Cos(breatheTime), -0.3f, 0.3f) * 2.0f) * walkSpeed / maxWalkSpeed, (-MathF.Cos(breatheTime / 2.0f) * 1.2f) * walkSpeed / maxWalkSpeed - yaw * 1.5f, roll);
+		}
 	}
 
 
 	void HandleSwayAnimation()
 	{
-		var swayspeed = 5;
+		var swayspeed = 30;
 
 		// Fix the sway faster if we're ironsighting
 		if ( isAiming )
-			swayspeed = 20;
+			swayspeed = 50;
 
 		// Lerp the eye position
 		lastEyeRot = Rotation.Lerp( lastEyeRot, player.Camera.Transform.Rotation, swayspeed * RealTime.Delta );
@@ -224,9 +240,13 @@ public class ViewModelHandler : Component
 		var angDif = player.Camera.Transform.Rotation.Angles() - lastEyeRot.Angles();
 		angDif = new Angles( angDif.pitch, MathX.RadianToDegree( MathF.Atan2( MathF.Sin( MathX.DegreeToRadian( angDif.yaw ) ), MathF.Cos( MathX.DegreeToRadian( angDif.yaw ) ) ) ), 0 );
 
-		// Perform sway
-		targetVectorPos += new Vector3( Math.Clamp( angDif.yaw * 0.04f, -1.5f, 1.5f ), 0.0f, Math.Clamp( angDif.pitch * 0.04f, -1.5f, 1.5f ) );
-		targetVectorRot += new Vector3( Math.Clamp( angDif.pitch * 0.2f, -4.0f, 4.0f ), Math.Clamp( angDif.yaw * 0.2f, -4.0f, 4.0f ), 0.0f );
+		// Perform sway (original multiplyers)
+		// targetVectorPos += new Vector3( Math.Clamp( angDif.yaw * 0.04f, -1.5f, 1.5f ), 0.0f, Math.Clamp( angDif.pitch * 0.04f, -1.5f, 1.5f ) );
+		// targetVectorRot += new Vector3( Math.Clamp( angDif.pitch * 0.2f, -4.0f, 4.0f ), Math.Clamp( angDif.yaw * 0.2f, -4.0f, 4.0f ), 0.0f );
+
+		// Perform sway (new multiplyers)
+		targetVectorPos += new Vector3( Math.Clamp( angDif.yaw * 0.02f, -0.75f, 0.75f ), 0.0f, Math.Clamp( angDif.pitch * 0.02f, -0.75f, 0.75f ) );
+    	targetVectorRot += new Vector3( Math.Clamp( angDif.pitch * 0.1f, -2.0f, 2.0f ), Math.Clamp( angDif.yaw * 0.1f, -2.0f, 2.0f ), 0.0f );
 	}
 
 
@@ -277,7 +297,7 @@ public class ViewModelHandler : Component
 
 	void HandleSprintAnimation()
 	{
-		if ( Weapon.IsRunning && Weapon.RunAnimData != AngPos.Zero && !Weapon.IsCustomizing )
+		if ( Weapon.IsRunning && Weapon.RunAnimData != AngPos.Zero && !Weapon.IsCustomizing || !player.IsOnGround && player.IsRunning && Weapon.RunAnimData != AngPos.Zero )
 		{
 			targetVectorPos += Weapon.RunAnimData.Pos;
 			targetVectorRot += MathUtil.ToVector3( Weapon.RunAnimData.Angle );

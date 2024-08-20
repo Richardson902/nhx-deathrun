@@ -1,2 +1,4 @@
 
-add running in the air, but make it not increase speed
+
+update running model
+
