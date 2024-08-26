@@ -1,11 +1,11 @@
 {
   "Title": "nhx-deathrun",
   "Type": "game",
-  "Org": "local",
+  "Org": "nhx",
   "Ident": "nhx_deathrun",
   "Schema": 1,
   "IncludeSourceFiles": false,
-  "Resources": null,
+  "Resources": "*.png\n*.ttf\n*.mp3\n*.wav\n*.config\n*.scss\n*.prefab\n*.fbx\n*.smd\n*credits*\nfonts/*",
   "PackageReferences": [],
   "EditorReferences": null,
   "Metadata": {
@@ -217,6 +217,12 @@
         {
           "Name": "Toggle Duck",
           "KeyboardCode": "C",
+          "GamepadCode": "None",
+          "GroupName": "Other"
+        },
+        {
+          "Name": "Toggle Camera",
+          "KeyboardCode": "g",
           "GamepadCode": "None",
           "GroupName": "Other"
         }

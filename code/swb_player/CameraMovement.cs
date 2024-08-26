@@ -27,6 +27,18 @@ public class CameraMovement : Component
 	{
 		if ( IsProxy ) return;
 
+		if( Input.Pressed( InputButtonHelper.ToggleCamera ) )
+		{
+			if( IsFirstPerson )
+			{
+				Distance = 100f;
+			}
+			else
+			{
+				Distance = 0f;
+			}
+		}
+
 		// Rotate the head based on mouse movement
 		var eyeAngles = Player.EyeAngles;
 
@@ -53,8 +65,11 @@ public class CameraMovement : Component
 			var camPos = Player.EyePos;
 			if ( !IsFirstPerson )
 			{
+
+				
 				// Perform a trace backwards to see where we can safely place the camera
 				var camForward = eyeAngles.ToRotation().Forward;
+				var camRight = eyeAngles.ToRotation().Right;
 				var camTrace = Scene.Trace.Ray( camPos, camPos - (camForward * Distance) )
 					.WithoutTags( TagsHelper.Player, TagsHelper.Trigger, TagsHelper.ViewModel, TagsHelper.Weapon )
 					.Run();
@@ -68,6 +83,8 @@ public class CameraMovement : Component
 				{
 					camPos = camTrace.EndPosition;
 				}
+
+				camPos += camRight * 20f;
 			}
 
 			// Set the position of the camera to our calculated position
