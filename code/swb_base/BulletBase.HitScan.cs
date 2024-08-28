@@ -8,11 +8,29 @@ public class HitScanBullet : IBulletBase
 {
 	public void Shoot( Weapon weapon, ShootInfo shootInfo, Vector3 spreadOffset )
 	{
+
+		// Bullet starts at the player;'s eye position as shown in the bulletTr variable
 		var player = weapon.Owner;
 		var forward = player.EyeAngles.Forward + spreadOffset;
 		forward = forward.Normal;
 		var endPos = player.EyePos + forward * 999999;
-		var bulletTr = weapon.TraceBullet( player.EyePos, endPos );
+
+		// Declaring the bullet start position
+		var bulletStartPos = player.EyePos;
+
+		if( !player.IsFirstPerson )
+		{
+			var camPos = player.Camera.Transform.Position;
+			bulletStartPos = camPos;
+
+		}
+		else
+		{
+			bulletStartPos = player.EyePos;
+		}
+
+		// Final bullet trace from the determined start position
+		var bulletTr = weapon.TraceBullet( bulletStartPos, endPos );
 		var hitObj = bulletTr.GameObject;
 
 		if ( SurfaceUtil.IsSkybox( bulletTr.Surface ) || bulletTr.HitPosition == Vector3.Zero ) return;

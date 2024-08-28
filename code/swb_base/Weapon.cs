@@ -17,6 +17,8 @@ public partial class Weapon : Component, IInventoryItem
 	public WeaponSettings Settings { get; private set; }
 	public List<Attachment> Attachments = new();
 
+	public bool isDeployed = false;
+
 	protected override void OnAwake()
 	{
 		Tags.Add( TagsHelper.Weapon );
@@ -68,6 +70,7 @@ public partial class Weapon : Component, IInventoryItem
 	public void OnCarryStop()
 	{
 		GameObject.Enabled = false;
+		isDeployed = false;
 	}
 
 	public bool CanCarryStop()
@@ -77,6 +80,12 @@ public partial class Weapon : Component, IInventoryItem
 
 	public void OnDeploy()
 	{
+
+		if( isDeployed )
+		{
+			return;
+		}
+
 		var delay = 0f;
 
 		if ( Primary.Ammo == 0 && !string.IsNullOrEmpty( DrawEmptyAnim ) )
@@ -102,6 +111,10 @@ public partial class Weapon : Component, IInventoryItem
 		// Boltback
 		if ( InBoltBack )
 			AsyncBoltBack( delay );
+
+		Log.Info( "ondeploy called. Delay: " + delay );
+
+		isDeployed = true;
 	}
 
 	protected override void OnStart()

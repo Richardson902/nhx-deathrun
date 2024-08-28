@@ -15,6 +15,10 @@ public class CameraMovement : Component
 	public Angles EyeAnglesOffset { get; set; }
 	public bool IsFirstPerson => Distance == 0f;
 
+	public bool isZooming;
+
+	public float camPos { get; set; }
+
 	protected override void OnAwake() { }
 
 	protected override void OnStart()
@@ -38,6 +42,24 @@ public class CameraMovement : Component
 				Distance = 0f;
 			}
 		}
+
+		if( Input.Down ( InputButtonHelper.SecondaryAttack ) && !Player.IsFirstPerson )
+		{
+			isZooming = true;
+			if( Distance > 50f )
+			{
+				Distance -= 5f;
+			}
+		}
+		if( !Input.Down ( InputButtonHelper.SecondaryAttack ) && !Player.IsFirstPerson )
+		{
+			isZooming = false;
+			if( Distance < 100f )
+			{
+				Distance += 5f;
+			}
+		}
+
 
 		// Rotate the head based on mouse movement
 		var eyeAngles = Player.EyeAngles;

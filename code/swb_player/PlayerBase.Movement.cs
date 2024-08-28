@@ -173,7 +173,7 @@ public partial class PlayerBase
 
 	void UpdateCrouch()
 	{
-		// if button down & not crouching & on grounf
+		// if button down & not crouching & on ground
 		if ( Input.Down( InputButtonHelper.Duck ) && !IsCrouching )
 		{
 			// crouching is true
@@ -258,7 +258,15 @@ public partial class PlayerBase
 
 		var sound = tr.Surface.PlayCollisionSound( footstepEvent.Transform.Position );
 		if ( sound is not null )
-			sound.Volume = footstepEvent.Volume;
+
+			if( IsFirstPerson )
+			{
+				sound.Volume = footstepEvent.Volume - .1f;
+			}
+			else
+			{
+				sound.Volume = footstepEvent.Volume - 0.8f;
+			}
 
 		timeSinceLastFootstep = 0;
 	}
